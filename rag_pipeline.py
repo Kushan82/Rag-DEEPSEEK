@@ -3,7 +3,12 @@ from vector_database import faiss_db
 from langchain.prompts import ChatPromptTemplate
 import os
 from dotenv import load_dotenv
+from vector_database import process_uploaded_pdf
 load_dotenv()
+
+
+uploaded_file_path = "path/to/user_uploaded.pdf"  # <- dynamic path
+faiss_db = process_uploaded_pdf(uploaded_file_path)
 
 llm_model = ChatGroq(
     model="deepseek-r1-distill-llama-70b", 
