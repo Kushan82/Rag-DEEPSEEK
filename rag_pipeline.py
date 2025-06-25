@@ -2,38 +2,31 @@ from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 import os
 from dotenv import load_dotenv
-from vector_database import process_uploaded_pdf
+
 load_dotenv()
 
-
-uploaded_file_path = "pdfs/user_uploaded.pdf"  # <- dynamic path
-faiss_db = process_uploaded_pdf(uploaded_file_path)
-
+# Define LLM
 llm_model = ChatGroq(
     model="deepseek-r1-distill-llama-70b", 
     api_key=os.environ["GROQ_API_KEY"]
 )
-def retrieve_docs(query):
-    return faiss_db.similarity_search(query)
 
-def get_context(documents):
-    context = "\n\n".join([doc.page_content for doc in documents])
-    return context
-
+# Prompt template
 custom_prompt_template = """
-Use the pieces of information provided in the context to answer user's question.
-If you dont know the answer, just say that you dont know, dont try to make up an answer. 
-Dont provide anything out of the given context
-Question: {question} 
-Context: {context} 
+Use the pieces of information provided in the context to answer the user's question.
+If you don't know the answer, say you don't know. Do not make up an answer.
+Don't use information outside the provided context.
+Question: {question}
+Context: {context}
 Answer:
 """
+
+# Reusable logic
+def get_context(documents):
+    return "\n\n".join([doc.page_content for doc in documents])
+
 def answer_query(documents, model, query):
     context = get_context(documents)
     prompt = ChatPromptTemplate.from_template(custom_prompt_template)
     chain = prompt | model
     return chain.invoke({"question": query, "context": context})
-
-#question = "What is the purpose of the dataset?"
-#retrieved_docs= retrieve_docs(question)
-#print(answer_query(documents=retrieved_docs, model=llm_model, query=question))

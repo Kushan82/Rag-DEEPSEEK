@@ -3,14 +3,15 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_ollama import OllamaEmbeddings
 from langchain_community.vectorstores import faiss
 import os
-
+import uuid
 pdf_directory = "pdfs/"
 
 def upload_pdf(file):
     os.makedirs(pdf_directory, exist_ok=True)
+    file.name = f"{uuid.uuid4().hex}.pdf"
     file_path = os.path.join(pdf_directory, file.name)
     with open(file_path, "wb") as f:
-        f.write(file.getbuffer())
+        f.write(file.read())
     return file_path
 
 def load_pdf(file_path):
